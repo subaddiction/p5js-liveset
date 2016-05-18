@@ -181,27 +181,9 @@ function draw(){
 
 	background(000);
 	ambientLight(128, 128, 128);
-	//pointLight(250, 250, 250, windowWidth/2, windowHeight/2, 0);
 	pointLight(255, 255, 255, 0, 0, 0);
 
-	//rotateX(radians(rotX));
-	//rotateY(radians(rotY));
-	//rotateZ(radians(rotZ));
-
-	//basicMaterial(250, 0, 0);
-	//ambientMaterial(X,Y,Z);
-
-	//scale(X/scaleFactor,Y/scaleFactor,Z/scaleFactor);
-	//scale(X/scaleFactor,X/scaleFactor,X/scaleFactor);
-  
-	//rotX = rotX + (fft.getEnergy('bass') / accumFactor);
-	//rotY = rotY + (fft.getEnergy('lowMid') / accumFactor);
-	//rotZ = rotZ + (fft.getEnergy('mid') / accumFactor);
-
-	//rotateZ(radians(rotZ));
-	//rotateY(radians(rotY));
-	//rotateX(radians(rotX));
-	
+	//pointLight(255, 255, 255, windowWidth/2, windowHeight/2, -10);
 	
 	for(i in rings){
 		
@@ -216,16 +198,11 @@ function draw(){
 		rotateZ(radians(rings[i].z));
 		rotateY(radians(rings[i].y));
 		rotateX(radians(rings[i].x));
-		//rotate(fft.getEnergy(rings[i].rX));
-		
-		//translate(1,1,1);
-		//rotateZ(radians(1));
 		
 		scale(fft.getEnergy(rings[i].S)/scaleFactor,fft.getEnergy(rings[i].S)/scaleFactor,fft.getEnergy(rings[i].S)/scaleFactor);
 		
 		ambientMaterial(fft.getEnergy(rings[i].r),fft.getEnergy(rings[i].g),fft.getEnergy(rings[i].b));
 		
-		//console.log(radians(fft.getEnergy(rings[i].rX)))
 		model(rings[i].model);
 		
 		pop();
