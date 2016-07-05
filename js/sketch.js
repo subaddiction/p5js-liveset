@@ -7,6 +7,8 @@ var rotZ = 45;
 var mic;
 var fft;
 var particleID = 0;
+var particles_size = 10;
+var particles_resize = 10;
 
 var accumFactor = 36;
 var scaleFactor = 10;
@@ -205,7 +207,8 @@ function setup() {
 
 function draw(){
   	
-  	var push_particles = 9;
+  	var push_particles = 3;
+  	var push_treshold = 127;
   	
 	fft.analyze();
 
@@ -225,17 +228,17 @@ function draw(){
 	rotY = rotY+(fft.getEnergy('lowMid')/5000);
 	rotateY(rotY);
 	
-	if(fft.getEnergy('bass') >= 127){
+	if(fft.getEnergy('bass') >= push_treshold){
 		var bass_color = color(fft.getEnergy('bass'),fft.getEnergy('mid'),fft.getEnergy('treble'));
 		system.injectParticles(push_particles, bass_color);
 	}
 	
-	if(fft.getEnergy('mid') >= 127){
+	if(fft.getEnergy('mid') >= push_treshold){
 		var mid_color = color(fft.getEnergy('mid'),fft.getEnergy('bass'),fft.getEnergy('treble'));
 		system.injectParticles(push_particles, mid_color);
 	}
 	
-	if(fft.getEnergy('treble') >= 127){
+	if(fft.getEnergy('treble') >= push_treshold){
 		var treble_color = color(fft.getEnergy('treble'),fft.getEnergy('mid'),fft.getEnergy('bass'));
 		system.injectParticles(push_particles, treble_color);
 	}
@@ -319,32 +322,7 @@ var Particle = function(id, position, pcolor) {
   
   this.velocity = createVector(randomX,randomY);
   this.acceleration = createVector(randomX,randomY);
-  
-//  switch(quadrant){
-////  	case 0:
-////  		this.velocity = createVector(randomValue,randomValue);
-////  		this.acceleration = createVector(randomValue,randomValue);
-////  	break;
-////  	
-////  	case 1:
-////  		this.velocity = createVector(randomValue,randomValue);
-////  		this.acceleration = createVector(randomValue,randomValue);
-////  	break;
-//  	
-////  	case 2:
-////  		this.velocity = createVector(random(0.0, -0.1), 0, random(-0.1, 0.0));
-////  		this.acceleration = createVector(random(0.0, -0.1), 0, random(-0.1, 0.0));
-////  	break;
-////  	
-////  	case 3:
-////  		this.velocity = createVector(random(-0.1, 0.0), 0, random(0.0, 0.1));
-////  		this.acceleration = createVector(random(-0.1, 0.0), 0, random(0.0, 0.1));
-////  	break;
-//  }
-  
-  
-  
-  
+
 //  if(!p_color){
 //  	this.color = color(fft.getEnergy('bass'),fft.getEnergy('bass'),fft.getEnergy('bass'));
 //  } else {
@@ -384,7 +362,7 @@ Particle.prototype.display = function() {
   push();
   fill(this.pcolor);
   translate(this.position.x, this.position.y, this.position.z);
-  sphere(10);
+  sphere(particles_resize);
   //box(10,10,10);
   //plane(10,10)
   pop();
@@ -421,12 +399,7 @@ ParticleSystem.prototype.run = function() {
 
 ParticleSystem.prototype.injectParticles =  function(n, c){
 	for(i=0; i<n; i++){
+		particles_resize = random(2,20);
 		this.addParticle(c);
 	}
-}
-
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
 }
