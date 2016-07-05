@@ -6,6 +6,7 @@ var rotY = 45;
 var rotZ = 45;
 var mic;
 var fft;
+var particleID = 0;
 
 var accumFactor = 36;
 var scaleFactor = 10;
@@ -109,11 +110,18 @@ function setup() {
 	fft.setInput(mic);
 	
 	system = new ParticleSystem(createVector(0,0));
+	var p_color;
+	
+	var p_number = 120;
 	
 	
 	$(document).on({
 		'keyup':function(e){
-			console.log(e.which);
+			//console.log(e.which);
+			
+			
+			
+			//p_color = null;
 			
 			switch(e.which){
 				case 81: //q
@@ -137,15 +145,18 @@ function setup() {
 				
 				
 				case 65: //a
-					system.injectParticles(1500);
+					p_color = color(fft.getEnergy('bass'),fft.getEnergy('mid'),fft.getEnergy('treble'));
+					system.injectParticles(p_number, p_color);
 				break;
 				
 				case 83: //s
-					system.injectParticles(1500);
+					p_color = color(fft.getEnergy('treble'),fft.getEnergy('mid'),fft.getEnergy('bass'));
+					system.injectParticles(p_number, p_color);
 				break;
 				
 				case 68: //d
-					system.injectParticles(1500);
+					p_color = color(fft.getEnergy('mid'),fft.getEnergy('bass'),fft.getEnergy('treble'));
+					system.injectParticles(p_number, p_color);
 				break;
 			}
 		}
@@ -193,13 +204,15 @@ function setup() {
 }
 
 function draw(){
-  
-  
+  	
+  	var push_particles = 9;
+  	
 	fft.analyze();
 
 	background(000);
 	ambientLight(128, 128, 128);
 	pointLight(255, 255, 255, 0, 0, 0);
+	
 	
 	//return;
 	//pointLight(255, 255, 255, windowWidth/2, windowHeight/2, -10);
@@ -213,7 +226,18 @@ function draw(){
 	rotateY(rotY);
 	
 	if(fft.getEnergy('bass') >= 127){
-		system.injectParticles(5);
+		var bass_color = color(fft.getEnergy('bass'),fft.getEnergy('mid'),fft.getEnergy('treble'));
+		system.injectParticles(push_particles, bass_color);
+	}
+	
+	if(fft.getEnergy('mid') >= 127){
+		var mid_color = color(fft.getEnergy('mid'),fft.getEnergy('bass'),fft.getEnergy('treble'));
+		system.injectParticles(push_particles, mid_color);
+	}
+	
+	if(fft.getEnergy('treble') >= 127){
+		var treble_color = color(fft.getEnergy('treble'),fft.getEnergy('mid'),fft.getEnergy('bass'));
+		system.injectParticles(push_particles, treble_color);
 	}
   	system.run();
 	pop()
@@ -245,19 +269,8 @@ function draw(){
 
 	}
 	
-	
-	
-	
-	
   
 }
-
-
-
-
-
-
-
 
 
 
@@ -268,15 +281,81 @@ function draw(){
 
 
 // A simple Particle class
-var Particle = function(position) {
-  //this.acceleration = createVector(random(-0.1, 0.1), random(-0.1, 0.1), random(-0.1, 0.1));
-  this.acceleration = createVector(random(-0.1, 0.1), 0, random(-0.1, 0.1));
-  //this.acceleration = createVector(1,1,1);
-  this.velocity = createVector(random(-0.1, 0.1), random(-0.1, 0.1), random(-0.1, 0.1));
-  //this.velocity = createVector(0, 0);
+var Particle = function(id, position, pcolor) {
+  //console.log(id%4);
+//  var quadrant = id%2;
+  
+//  var randX = random(-100, 100)/1000;
+//  var randZ = random(-100, 100)/1000;
+
+//  var minimo = -96;
+//  var maximo = 96;
+//  
+//  var randX = Math.floor(Math.random() * (maximo - minimo + 1)) + minimo; //Math.random();
+//  var randZ = Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
+
+//  randX = randX/1000;
+//  randZ = randZ/1000;
+
+//  this.acceleration = createVector(randX, 0, randZ);
+//  this.velocity = createVector(randX, 0, randZ);
+
+  //this.acceleration = createVector(random(-0.1, 0.1), 0, random(-0.1, 0.1));
+  //this.velocity = createVector(random(-0.1, 0.1), 0, random(-0.1, 0.1));
+  
   //this.position = position.copy();
   this.position = createVector(0, 0);
-  this.lifespan = 255.0;
+  this.lifespan = 60.0;
+  
+  var velocityRange = 100;
+  var velocityFactor = 0.1;
+  
+  var randomX = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  var randomY = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  
+//  console.log(randomX+' '+randomY);
+//  randomX = randomX - 0.05;
+//  randomY = randomY - 0.05;
+  
+  this.velocity = createVector(randomX,randomY);
+  this.acceleration = createVector(randomX,randomY);
+  
+//  switch(quadrant){
+////  	case 0:
+////  		this.velocity = createVector(randomValue,randomValue);
+////  		this.acceleration = createVector(randomValue,randomValue);
+////  	break;
+////  	
+////  	case 1:
+////  		this.velocity = createVector(randomValue,randomValue);
+////  		this.acceleration = createVector(randomValue,randomValue);
+////  	break;
+//  	
+////  	case 2:
+////  		this.velocity = createVector(random(0.0, -0.1), 0, random(-0.1, 0.0));
+////  		this.acceleration = createVector(random(0.0, -0.1), 0, random(-0.1, 0.0));
+////  	break;
+////  	
+////  	case 3:
+////  		this.velocity = createVector(random(-0.1, 0.0), 0, random(0.0, 0.1));
+////  		this.acceleration = createVector(random(-0.1, 0.0), 0, random(0.0, 0.1));
+////  	break;
+//  }
+  
+  
+  
+  
+//  if(!p_color){
+//  	this.color = color(fft.getEnergy('bass'),fft.getEnergy('bass'),fft.getEnergy('bass'));
+//  } else {
+//  	this.color = p_color;
+//  }
+
+  this.pcolor = pcolor;
+
+  
+  
+  //console.log(fft.getEnergy('bass'));
 };
 
 Particle.prototype.run = function() {
@@ -287,18 +366,28 @@ Particle.prototype.run = function() {
 // Method to update position
 Particle.prototype.update = function(){  
   //noise = createVector(random(-width, width), random(-width, width));
-  this.velocity.add(this.acceleration);
-  this.position.add(this.velocity);
+  
+
+	this.velocity.add(this.acceleration);
+	this.position.add(this.velocity);
+
+  
   //this.position.add([random(-1,1), random(-1,1)]);
   //this.position = noise;
   this.lifespan -= 2;
+  //console.log(this);
 };
 
 // Method to display
 Particle.prototype.display = function() {
+  
+  push();
+  fill(this.pcolor);
   translate(this.position.x, this.position.y, this.position.z);
-  box(10,10,10);
+  sphere(10);
+  //box(10,10,10);
   //plane(10,10)
+  pop();
 };
 
 // Is the particle still useful?
@@ -315,8 +404,9 @@ var ParticleSystem = function(position) {
   this.particles = [];
 };
 
-ParticleSystem.prototype.addParticle = function() {
-  this.particles.push(new Particle(this.origin));
+ParticleSystem.prototype.addParticle = function(pcolor) {
+  this.particles.push(new Particle(particleID, this.origin, pcolor));
+  particleID++;
 };
 
 ParticleSystem.prototype.run = function() {
@@ -329,8 +419,14 @@ ParticleSystem.prototype.run = function() {
   }
 };
 
-ParticleSystem.prototype.injectParticles =  function(n){
-	for(i=0; i<=n; i++){
-		this.addParticle();
+ParticleSystem.prototype.injectParticles =  function(n, c){
+	for(i=0; i<n; i++){
+		this.addParticle(c);
 	}
+}
+
+// Returns a random integer between min (included) and max (excluded)
+// Using Math.round() will give you a non-uniform distribution!
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
 }
