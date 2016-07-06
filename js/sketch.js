@@ -112,6 +112,9 @@ function setup() {
 	fft.setInput(mic);
 	
 	system = new ParticleSystem(createVector(0,0));
+	
+	system3d = new ParticleSystem(createVector(0,0));
+	
 	var p_color;
 	
 	var p_number = 120;
@@ -148,17 +151,17 @@ function setup() {
 				
 				case 65: //a
 					p_color = color(fft.getEnergy('bass'),fft.getEnergy('mid'),fft.getEnergy('treble'));
-					system.injectParticles(p_number, p_color);
+					system3d.injectParticles(p_number, p_color, true,true,true);
 				break;
 				
 				case 83: //s
 					p_color = color(fft.getEnergy('treble'),fft.getEnergy('mid'),fft.getEnergy('bass'));
-					system.injectParticles(p_number, p_color);
+					system3d.injectParticles(p_number, p_color, true,true,true);
 				break;
 				
 				case 68: //d
 					p_color = color(fft.getEnergy('mid'),fft.getEnergy('bass'),fft.getEnergy('treble'));
-					system.injectParticles(p_number, p_color);
+					system3d.injectParticles(p_number, p_color, true,true,true);
 				break;
 			}
 		}
@@ -230,19 +233,20 @@ function draw(){
 	
 	if(fft.getEnergy('bass') >= push_treshold){
 		var bass_color = color(fft.getEnergy('bass'),fft.getEnergy('mid'),fft.getEnergy('treble'));
-		system.injectParticles(push_particles, bass_color);
+		system.injectParticles(push_particles, bass_color, true,true,false);
 	}
 	
 	if(fft.getEnergy('mid') >= push_treshold){
 		var mid_color = color(fft.getEnergy('mid'),fft.getEnergy('bass'),fft.getEnergy('treble'));
-		system.injectParticles(push_particles, mid_color);
+		system.injectParticles(push_particles, mid_color,  true,false,true);
 	}
 	
 	if(fft.getEnergy('treble') >= push_treshold){
 		var treble_color = color(fft.getEnergy('treble'),fft.getEnergy('mid'),fft.getEnergy('bass'));
-		system.injectParticles(push_particles, treble_color);
+		system.injectParticles(push_particles, treble_color,  false,true,true);
 	}
   	system.run();
+  	system3d.run('box');
 	pop()
 	
 	for(i in rings){
@@ -284,7 +288,7 @@ function draw(){
 
 
 // A simple Particle class
-var Particle = function(id, position, pcolor) {
+var Particle = function(id, position, pcolor,randx,randy,randz) {
   //console.log(id%4);
 //  var quadrant = id%2;
   
@@ -311,17 +315,29 @@ var Particle = function(id, position, pcolor) {
   this.lifespan = 60.0;
   
   var velocityRange = 100;
-  var velocityFactor = 0.1;
+  var velocityFactor = 0.05;
   
-  var randomX = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
-  var randomY = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  if(randx){
+  	  var randomX = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  }
+  
+  if(randy){
+  	  var randomY = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  }
+  
+  if(randz){
+  	  var randomZ = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
+  }
+
+
+
   
 //  console.log(randomX+' '+randomY);
 //  randomX = randomX - 0.05;
 //  randomY = randomY - 0.05;
   
-  this.velocity = createVector(randomX,randomY);
-  this.acceleration = createVector(randomX,randomY);
+  this.velocity = createVector(randomX,randomY,randomZ);
+  this.acceleration = createVector(randomX,randomY,randomZ);
 
 //  if(!p_color){
 //  	this.color = color(fft.getEnergy('bass'),fft.getEnergy('bass'),fft.getEnergy('bass'));
@@ -336,9 +352,9 @@ var Particle = function(id, position, pcolor) {
   //console.log(fft.getEnergy('bass'));
 };
 
-Particle.prototype.run = function() {
+Particle.prototype.run = function(shape) {
   this.update();
-  this.display();
+  this.display(shape);
 };
 
 // Method to update position
@@ -357,14 +373,22 @@ Particle.prototype.update = function(){
 };
 
 // Method to display
-Particle.prototype.display = function() {
+Particle.prototype.display = function(shape) {
   
   push();
   fill(this.pcolor);
   translate(this.position.x, this.position.y, this.position.z);
-  sphere(particles_resize);
-  //box(10,10,10);
-  //plane(10,10)
+  
+  switch(shape){
+	case 'box':
+		box(particles_resize,particles_resize,particles_resize);
+	break;
+
+	default:
+	
+	sphere(particles_resize);
+
+  }
   pop();
 };
 
@@ -382,24 +406,24 @@ var ParticleSystem = function(position) {
   this.particles = [];
 };
 
-ParticleSystem.prototype.addParticle = function(pcolor) {
-  this.particles.push(new Particle(particleID, this.origin, pcolor));
+ParticleSystem.prototype.addParticle = function(pcolor,randx,randy,randz) {
+  this.particles.push(new Particle(particleID, this.origin, pcolor,randx,randy,randz));
   particleID++;
 };
 
-ParticleSystem.prototype.run = function() {
+ParticleSystem.prototype.run = function(shape) {
   for (var i = this.particles.length-1; i >= 0; i--) {
     var p = this.particles[i];
-    p.run();
+    p.run(shape);
     if (p.isDead()) {
       this.particles.splice(i, 1);
     }
   }
 };
 
-ParticleSystem.prototype.injectParticles =  function(n, c){
+ParticleSystem.prototype.injectParticles =  function(n, c, randx,randy,randz){
 	for(i=0; i<n; i++){
 		particles_resize = random(2,20);
-		this.addParticle(c);
+		this.addParticle(c,randx,randy,randz);
 	}
 }
