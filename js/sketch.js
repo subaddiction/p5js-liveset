@@ -98,7 +98,7 @@ function loadPreset(preset, ring){
 
 function setup() {
 
-	frameRate(30);
+	frameRate(25);
 	createCanvas(windowWidth, windowHeight, WEBGL);
   	
   	for(i in rings){
@@ -117,7 +117,7 @@ function setup() {
 	
 	var p_color;
 	
-	var p_number = 120;
+	var p_number = 360;
 	
 	
 	$(document).on({
@@ -312,10 +312,10 @@ var Particle = function(id, position, pcolor,randx,randy,randz) {
   
   //this.position = position.copy();
   this.position = createVector(0, 0);
-  this.lifespan = 60.0;
+  this.lifespan = 75.0;
   
   var velocityRange = 100;
-  var velocityFactor = 0.05;
+  var velocityFactor = 0.02;
   
   if(randx){
   	  var randomX = (random(0, velocityRange)-(velocityRange/2))*velocityFactor; //random(-36,36)/36;
@@ -423,7 +423,7 @@ ParticleSystem.prototype.run = function(shape) {
 
 ParticleSystem.prototype.injectParticles =  function(n, c, randx,randy,randz){
 	for(i=0; i<n; i++){
-		particles_resize = random(2,20);
+		//particles_resize = random(2,20);
 		this.addParticle(c,randx,randy,randz);
 	}
 }
